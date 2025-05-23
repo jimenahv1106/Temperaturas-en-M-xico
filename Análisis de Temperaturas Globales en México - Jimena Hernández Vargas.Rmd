@@ -1,0 +1,92 @@
+---
+title: "Análisis de Temperaturas Globales en México"
+author: "Jimena Hernández Vargas"
+date: "2025-05-23"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(lubridate)
+library(knitr)
+```
+
+# Introducción
+
+En este informe se analiza el cambio de temperatura a lo largo del tiempo en México, utilizando datos históricos de temperaturas globales por país. El objetivo es observar tendencias y posibles señales del cambio climático, explorando visualmente los datos y realizando un análisis exploratorio simple. 
+
+# Exploración y limpieza de datos
+
+Primero, cargamos el conjunto de datos y filtramos la información únicamente para México:
+
+```{r cargar-datos}
+datos_csv <- file.choose()
+temperaturas <- read_csv(datos_csv)
+
+mexico <- temperaturas %>% 
+  filter(Country == "Mexico") %>% 
+  mutate(dt = as.Date(dt),
+         year = year(dt)) %>% 
+  filter(!is.na(AverageTemperature))
+```
+
+resumen general del dataset:
+
+```{r resumen}
+summary(mexico)
+glimpse(mexico)
+```
+
+Agrupamos por año para facilitar el análisis:
+
+```{r agrupar-anual}
+mexico_anual <- mexico %>% 
+  group_by(year) %>% 
+  summarise(avg_temp = mean(AverageTemperature, na.rm = TRUE))
+```
+
+# Visualización y análisis
+
+## Temperatura media anual en México a lo largo del tiempo
+
+```{r grafico1}
+ggplot(mexico_anual, aes(x = year, y = avg_temp)) +
+  geom_line(color = "tomato") +
+  geom_smooth(method = "loess", se = FALSE, color = "blue") +
+  labs(title = "Temperatura promedio anual en México",
+       x = "Año",
+       y = "Temperatura promedio (°C)") +
+  theme_minimal()
+```
+
+*Comentario:* En esta gráfica se puede ver que la temperatura promedio en México ha ido aumentando, especialmente en las últimas décadas. Aunque hay variaciones de un año a otro, la tendencia general muestra un calentamiento progresivo.
+
+## Distribución de la temperatura por década
+
+```{r grafico2}
+mexico <- mexico %>% 
+  mutate(decade = floor(year / 10) * 10)
+
+mexico_decada <- mexico %>% 
+  group_by(decade) %>% 
+  summarise(avg_temp = mean(AverageTemperature, na.rm = TRUE))
+
+mexico %>% 
+  ggplot(aes(x = factor(decade), y = AverageTemperature)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(title = "Distribución de temperatura promedio por década",
+       x = "Década",
+       y = "Temperatura promedio (°C)") +
+  theme_minimal()
+```
+
+*Comentario:* Aquí se observa que las décadas más recientes han tenido temperaturas más altas en promedio. Además, la dispersión parece disminuir, lo que sugiere menos variabilidad, aunque con valores más altos.
+
+# Conclusiones
+
+A través de este análisis se puede observar un aumento progresivo en la temperatura promedio en México. Esto respalda la preocupación sobre el cambio climático y sus efectos a nivel nacional. Una línea futura de análisis podría ser comparar estos datos con otros países o incorporar datos de precipitación y eventos climáticos extremos.
+
+---
