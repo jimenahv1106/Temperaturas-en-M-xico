@@ -3,4 +3,3 @@ Este proyecto analiza la evolución de la temperatura media en México a lo larg
 
 Autora: Jimena Hernández Vargas
 Contacto: jimena.hernandezva@gmail.com
-Fecha: Mayo 2025
